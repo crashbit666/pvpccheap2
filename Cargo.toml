@@ -1,0 +1,54 @@
+[package]
+name = "pvpccheap_backend"
+version = "0.1.0"
+edition = "2021"
+authors = ["Crashbit"]
+
+[dependencies]
+# Web Framework
+actix-web = "4.11.0"
+actix-cors = "0.7.1"
+actix-session = { version = "0.11.0", features = ["cookie-session"] }
+actix-ws = "0.3.0"
+
+# Database
+diesel = { version = "2.2.12", features = ["postgres", "chrono", "uuid", "serde_json"] }
+diesel-async = { version = "0.6.1", features = ["postgres", "deadpool"] }
+diesel_migrations = "2.2.0"
+deadpool-diesel = { version = "0.6.1", features = ["postgres"] }
+
+# Serialization
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.143"
+
+# Authentication
+jsonwebtoken = "9.3.1"
+oauth2 = { version = "5.0.0", features = ["reqwest"] }
+reqwest = { version = "0.12.23", features = ["json"] }
+
+# Utilities
+tokio = { version = "1.47.1", features = ["full"] }
+chrono = { version = "0.4.41", features = ["serde"] }
+chrono-tz = "0.10.4"
+uuid = { version = "1.18.1", features = ["v4", "serde"] }
+dotenv = "0.15.0"
+env_logger = "0.11.8"
+log = "0.4.28"
+thiserror = "2.0.16"
+anyhow = "1.0.99"
+rand = "0.9.2"
+argon2 = "0.5.3"
+
+# Push notifications
+fcm = "0.9.2"
+
+# Scheduling
+cron = "0.15.0"
+
+# Price optimization
+rust_decimal = { version = "1.37.2", features = ["serde", "diesel"] }
+rust_decimal_macros = "1.37.1"
+
+# Additional dependencies needed
+futures-util = "0.3.31"
+hex = "0.4.3"

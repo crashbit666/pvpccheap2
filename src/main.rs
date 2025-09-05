@@ -79,17 +79,23 @@ async fn main() -> std::io::Result<()> {
     log::info!("Starting server at http://{}:{}", host, port);
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
-            .allowed_origin("http://localhost:8080")
-            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-            .allowed_headers(vec![
-                actix_web::http::header::AUTHORIZATION,
-                actix_web::http::header::ACCEPT,
-                actix_web::http::header::CONTENT_TYPE,
-            ])
-            .supports_credentials()
-            .max_age(3600);
+        let cors = if cfg!(debug_assertions) {
+            // En mode desenvolupament, permetre tots els orígens
+            Cors::permissive()
+        } else {
+            // En producció, només orígens específics
+            Cors::default()
+                .allowed_origin("http://localhost:3000")
+                .allowed_origin("http://localhost:8080")
+                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+                .allowed_headers(vec![
+                    actix_web::http::header::AUTHORIZATION,
+                    actix_web::http::header::ACCEPT,
+                    actix_web::http::header::CONTENT_TYPE,
+                ])
+                .supports_credentials()
+                .max_age(3600)
+        };
 
         App::new()
             .app_data(web::Data::new(app_state.clone()))
@@ -143,7 +149,9 @@ async fn main() -> std::io::Result<()> {
                 .route("/ws", web::get().to(handlers::websocket::websocket_handler))
             )
             // Health check
-            .route("/health", web::get().to(handlers::health::health_check))
+                            .route("/health", web::get().to(handlers::health::health_check))
+                // Servir fitxers estàtics per testing
+                .service(actix_files::Files::new("/", "./").index_file("test.html"))
     })
     .bind((host, port))?
     .run()

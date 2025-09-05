@@ -136,7 +136,8 @@ async fn main() -> std::io::Result<()> {
                     .route("/{rule_id}", web::get().to(handlers::rule::get_rule))
                     .route("/{rule_id}", web::put().to(handlers::rule::update_rule))
                     .route("/{rule_id}", web::delete().to(handlers::rule::delete_rule))
-                    .route("/preview", web::post().to(handlers::rule::preview_schedule))
+                    // TODO: Implementar preview de schedule
+                    // .route("/preview", web::post().to(handlers::rule::preview_schedule))
                 )
                 // Schedules routes
                 .service(web::scope("/schedules")

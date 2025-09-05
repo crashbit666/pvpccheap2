@@ -24,13 +24,22 @@ pub struct HeartbeatResponse {
 
 // Handler per sincronitzar dispositius des de l'app
 pub async fn sync_devices(
+    req: actix_web::HttpRequest,
     web::Json(sync_req): web::Json<DeviceSyncRequest>,
-    // TODO: Add authentication
     data: web::Data<AppState>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    // Obtenir user_id del JWT token
+    let auth_header = req.headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .ok_or_else(|| actix_web::error::ErrorUnauthorized("Missing or invalid token"))?;
+    
+    let claims = crate::handlers::auth::verify_jwt(auth_header, &data.jwt_secret)?;
+    let user_id = Uuid::parse_str(&claims.sub)
+        .map_err(|_| actix_web::error::ErrorBadRequest("Invalid user ID in token"))?;
+    
     let pool = &data.db_pool;
-    // TODO: Get user_id from authentication
-    let user_id = Uuid::new_v4(); // Temporary for testing
     
     // Processar structures
     for structure in sync_req.structures {
@@ -55,13 +64,22 @@ pub async fn sync_devices(
 
 // Handler per al heartbeat de l'app
 pub async fn heartbeat(
+    http_req: actix_web::HttpRequest,
     web::Json(req): web::Json<HeartbeatRequest>,
-    // TODO: Add authentication
     data: web::Data<AppState>,
 ) -> Result<HttpResponse, actix_web::Error> {
+    // Obtenir user_id del JWT token
+    let auth_header = http_req.headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .ok_or_else(|| actix_web::error::ErrorUnauthorized("Missing or invalid token"))?;
+    
+    let claims = crate::handlers::auth::verify_jwt(auth_header, &data.jwt_secret)?;
+    let user_id = Uuid::parse_str(&claims.sub)
+        .map_err(|_| actix_web::error::ErrorBadRequest("Invalid user ID in token"))?;
+    
     let pool = &data.db_pool;
-    // TODO: Get user_id from authentication
-    let user_id = Uuid::new_v4(); // Temporary for testing
     
     // Actualitzar o crear sessió mòbil
     update_mobile_session(pool, user_id, &req).await?;
